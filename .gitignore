@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Local databases and vector indexes
+database/*.db
+database/*.db-*
+chroma_db/*
+!chroma_db/README.md
+
+# Generated exports
+exports/markdown/*
+exports/pdf/*
+exports/json/*
+!exports/markdown/.gitkeep
+!exports/pdf/.gitkeep
+!exports/json/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log

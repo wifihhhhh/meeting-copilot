@@ -1,0 +1,15 @@
+{
+  "title": "微服务拆分技术评审",
+  "date": "2024-06-15",
+  "time": "10:00-11:30",
+  "participants": ["王工", "张总", "陈架构", "刘测试"],
+  "summary": "会议评审了微服务拆分方案，确定第一期采用 DDD，先拆用户服务和订单服务。",
+  "topics": [],
+  "decisions": [
+    {"owner": "王工", "content": "第一期采用 DDD，先拆用户服务和订单服务", "deadline": "", "topic": "微服务拆分"}
+  ],
+  "action_items": [
+    {"owner": "王工", "task": "补充服务边界文档", "deadline": "6/20", "status": "待办"},
+    {"owner": "刘测试", "task": "输出契约测试计划", "deadline": "6/22", "status": "待办"}
+  ]
+}

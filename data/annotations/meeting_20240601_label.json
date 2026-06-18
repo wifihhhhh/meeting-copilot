@@ -1,0 +1,17 @@
+{
+  "title": "Q3 产品规划讨论",
+  "date": "2024-06-01",
+  "time": "14:00-15:30",
+  "participants": ["张总", "李经理", "王工", "赵设计"],
+  "summary": "会议围绕 Q3 产品规划展开，确定优先开发分享裂变和邀请奖励，并在 7 月启动微服务拆分。",
+  "topics": [],
+  "decisions": [
+    {"owner": "", "content": "Q3 优先开发分享裂变和邀请奖励", "deadline": "", "topic": "新功能优先级排序"},
+    {"owner": "王工", "content": "7 月启动微服务拆分，由王工出技术方案", "deadline": "6/14", "topic": "技术架构升级"}
+  ],
+  "action_items": [
+    {"owner": "李经理", "task": "完成分享裂变 PRD", "deadline": "下周一", "status": "待办"},
+    {"owner": "王工", "task": "提交微服务拆分技术方案", "deadline": "6/14", "status": "待办"},
+    {"owner": "赵设计", "task": "提交分享页面设计稿", "deadline": "6/10", "status": "待办"}
+  ]
+}
