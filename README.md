@@ -1,6 +1,6 @@
 # Meeting Copilot 智能会议纪要系统
 
-Meeting Copilot 是一个基于 **Python、Streamlit、Ollama、ChromaDB 与 SQLite** 构建的本地智能会议工作台。它可以把非结构化会议记录转换为结构化纪要，提取议题、发言要点、决议与待办事项，并将历史会议沉淀为可检索、可追问的个人知识库。
+Meeting Copilot 是一个基于 **Python、Streamlit、Ollama、ChromaDB 与 SQLite** 构建的本地智能会议工作台，将非结构化会议记录转换为可编辑、可检索、可追问的结构化知识资产，并以本地大模型、RAG、知识图谱和待办看板构成完整的智能会议工作流。
 
 本项目面向 NLP / 深度学习综合实践课程设计，完整覆盖 **Prompt Engineering、JSON Schema 结构化输出、Pydantic 校验、RAG、向量检索、数据持久化、效果评估与 Web 工程实践**。
 
@@ -327,7 +327,3 @@ python -m pip install chromadb
 - 当前 Hash Embedding 无需额外模型，部署简单，但语义效果弱于专业中文 Embedding 模型。
 - 当前账号体系适合本地课程演示；公网部署时应增加 HTTPS、服务端会话、限流、密钥管理和正式数据库。
 - 可进一步接入 Whisper、BGE-M3、PostgreSQL、对象存储和异步任务队列。
-
-## 一句话介绍
-
-> Meeting Copilot 将非结构化会议记录转换为可编辑、可检索、可追问的结构化知识资产，并以本地大模型、RAG、知识图谱和待办看板构成完整的智能会议工作流。
