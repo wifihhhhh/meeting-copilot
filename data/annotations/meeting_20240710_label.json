@@ -1,0 +1,9 @@
+{
+  "title": "测试计划评审", "date": "2024-07-10", "time": "14:00-15:00",
+  "participants": ["刘测试", "王工", "李经理"], "summary": "评审分享活动和微服务拆分测试计划。", "topics": [],
+  "decisions": [{"owner": "", "content": "测试分为功能测试、契约测试和灰度监控三部分", "deadline": "", "topic": "测试计划"}],
+  "action_items": [
+    {"owner": "刘测试", "task": "提交完整测试用例", "deadline": "7/12", "status": "待办"},
+    {"owner": "王工", "task": "确认契约测试接口", "deadline": "7/13", "status": "待办"}
+  ]
+}

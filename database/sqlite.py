@@ -55,6 +55,21 @@ def migrate_existing_schema() -> None:
         if "user_id" not in meeting_columns:
             conn.execute(text("ALTER TABLE meetings ADD COLUMN user_id INTEGER NOT NULL DEFAULT 1"))
             conn.execute(text("CREATE INDEX IF NOT EXISTS ix_meetings_user_id ON meetings(user_id)"))
+        if "source" not in meeting_columns:
+            conn.execute(text("ALTER TABLE meetings ADD COLUMN source VARCHAR(80) NOT NULL DEFAULT 'user'"))
+        if "external_id" not in meeting_columns:
+            conn.execute(text("ALTER TABLE meetings ADD COLUMN external_id VARCHAR(120) NOT NULL DEFAULT ''"))
+        if "is_shared" not in meeting_columns:
+            conn.execute(text("ALTER TABLE meetings ADD COLUMN is_shared BOOLEAN NOT NULL DEFAULT 0"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_meetings_source ON meetings(source)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_meetings_external_id ON meetings(external_id)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_meetings_is_shared ON meetings(is_shared)"))
+        conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_meetings_source_external_id "
+                "ON meetings(source, external_id) WHERE external_id <> ''"
+            )
+        )
 
         qa_columns = _table_columns(conn, "qa_records")
         if qa_columns and "user_id" not in qa_columns:

@@ -1,0 +1,9 @@
+{
+  "title": "项目周会", "date": "2024-07-01", "time": "09:30-10:00",
+  "participants": ["张总", "李经理", "王工", "赵设计"], "summary": "同步项目进度并确定本周完成研发排期和接口设计。", "topics": [],
+  "decisions": [{"owner": "", "content": "本周重点完成研发排期和接口设计", "deadline": "", "topic": "项目进度"}],
+  "action_items": [
+    {"owner": "王工", "task": "输出接口清单", "deadline": "7/3", "status": "待办"},
+    {"owner": "李经理", "task": "确认活动规则", "deadline": "7/2", "status": "待办"}
+  ]
+}

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -37,6 +37,9 @@ class Meeting(Base):
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
     minutes_json: Mapped[str] = mapped_column(Text, nullable=False)
     minutes_markdown: Mapped[str] = mapped_column(Text, nullable=False)
+    source: Mapped[str] = mapped_column(String(80), nullable=False, default="user", index=True)
+    external_id: Mapped[str] = mapped_column(String(120), nullable=False, default="", index=True)
+    is_shared: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
     created_at: Mapped[str] = mapped_column(String(30), nullable=False, default=utc_now_text)
     updated_at: Mapped[str] = mapped_column(String(30), nullable=False, default=utc_now_text)
 
@@ -136,6 +139,9 @@ class MeetingRecord:
     minutes_markdown: str
     created_at: str
     updated_at: str
+    source: str = "user"
+    external_id: str = ""
+    is_shared: bool = False
 
 
 @dataclass

@@ -1,6 +1,11 @@
 import streamlit as st
 
 from auth_ui import render_user_box, require_login
+from config import (
+    DEFAULT_EMBEDDING_PROVIDER,
+    DEFAULT_MODEL,
+    RAG_SIMILARITY_THRESHOLD,
+)
 from database.repository import MeetingRepository
 from services.meeting_rag import MeetingRAG, VectorStoreUnavailableError
 from services.ollama_client import OllamaClient
@@ -14,6 +19,10 @@ render_user_box()
 page_header("RAG 跨会议问答", "从当前账号的历史会议纪要中检索证据，并生成带来源的回答。", "私有知识库")
 
 repo = MeetingRepository()
+
+st.session_state.setdefault("model", DEFAULT_MODEL)
+st.session_state.setdefault("embedding_provider", DEFAULT_EMBEDDING_PROVIDER)
+st.session_state.setdefault("similarity_threshold", RAG_SIMILARITY_THRESHOLD)
 
 meetings = repo.list_meetings(user_id=user_id)
 meeting_options = {"全部会议": None}
@@ -29,11 +38,35 @@ with st.expander("问答设置", expanded=True):
         top_k = st.slider("检索 Top-K", min_value=1, max_value=10, value=5)
     with q4:
         selected_meeting = st.selectbox("限定会议范围", list(meeting_options.keys()))
-    st.caption("RAG 只会检索当前登录账号的会议记录。")
+    e1, e2, e3 = st.columns([1.0, 1.0, 1.4], gap="large")
+    with e1:
+        embedding_provider = st.selectbox(
+            "Embedding",
+            ["hash", "bge-m3"],
+            index=0 if st.session_state.get("embedding_provider", "hash") == "hash" else 1,
+        )
+    with e2:
+        use_threshold = st.toggle(
+            "相似度阈值",
+            value=st.session_state.get("use_similarity_threshold", embedding_provider == "bge-m3"),
+        )
+    with e3:
+        similarity_threshold = st.slider(
+            "最低相似度",
+            min_value=0.0,
+            max_value=1.0,
+            value=float(st.session_state.get("similarity_threshold", 0.30)),
+            step=0.05,
+            disabled=not use_threshold,
+        )
+    st.caption("RAG 会检索当前账号的私有会议和系统共享只读语料；BGE-M3 需先执行 ollama pull bge-m3。")
 
 selected_meeting_id = meeting_options[selected_meeting]
 st.session_state.model = model
 st.session_state.use_llm = use_llm
+st.session_state.embedding_provider = embedding_provider
+st.session_state.use_similarity_threshold = use_threshold
+st.session_state.similarity_threshold = similarity_threshold
 
 actions = repo.list_action_items(user_id=user_id)
 decisions = repo.list_decisions(user_id=user_id)
@@ -58,7 +91,12 @@ ask = st.button("开始问答", type="primary", use_container_width=True)
 if ask and question:
     loading = st.empty()
     try:
-        rag = MeetingRAG(repository=repo, client=OllamaClient(model=model))
+        rag = MeetingRAG(
+            repository=repo,
+            client=OllamaClient(model=model),
+            embedding_provider=embedding_provider,
+            similarity_threshold=similarity_threshold if use_threshold else None,
+        )
         loading.markdown(skeleton_loader("正在检索历史会议"), unsafe_allow_html=True)
         with st.spinner("正在检索我的历史会议并生成回答..."):
             result = rag.answer(question, top_k=top_k, use_llm=use_llm, meeting_id=selected_meeting_id, user_id=user_id)

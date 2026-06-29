@@ -49,4 +49,4 @@ def parse_json_block(text: str) -> dict[str, Any]:
     end = stripped.rfind("}")
     if start == -1 or end == -1 or end <= start:
         raise ValueError("LLM output does not contain a JSON object.")
-    return json.loads(stripped[start : end + 1])
+    return json.loads(stripped[start : end + 1], strict=False)

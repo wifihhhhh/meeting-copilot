@@ -26,11 +26,12 @@ flowchart LR
     UI --> EX[MeetingExtractor]
     EX --> OLLAMA[Ollama / Qwen2.5]
     EX --> SCHEMA[JSON Schema + Pydantic]
-    EX --> FALLBACK[规则兜底]
+    EX --> HYBRID[字段级混合：待办LLM / 决议规则优先]
+    HYBRID --> FALLBACK[异常时规则兜底]
     UI --> REPO[SQLAlchemy Repository]
     REPO --> SQLITE[(SQLite)]
     UI --> RAG[MeetingRAG]
-    RAG --> EMB[Hash Embedding]
+    RAG --> EMB[BGE-M3 / Hash离线兜底]
     RAG --> CHROMA[(ChromaDB)]
     RAG --> OLLAMA
     UI --> EXPORT[Markdown / JSON / PDF]
@@ -41,7 +42,7 @@ flowchart LR
 
 1. 用户登录后粘贴或上传会议转写文本。
 2. `MeetingExtractor` 调用 Qwen2.5，并使用 `MeetingMinutes` JSON Schema 约束输出。
-3. Pydantic 校验结果；模型不可用或结果异常时可启用规则兜底。
+3. Pydantic 校验结果；正常情况下待办采用 LLM 输出，决议优先采用规则结果；模型不可用或结果异常时整体使用规则兜底。
 4. 纪要、决议和待办通过 SQLAlchemy 写入 SQLite。
 5. Markdown 纪要被切分、向量化并写入 ChromaDB。
 6. 用户提问时，系统检索相关会议片段，再由 Qwen2.5 生成带来源回答。
@@ -51,12 +52,12 @@ flowchart LR
 | 层级 | 技术 |
 |---|---|
 | Web 界面 | Streamlit |
-| 大语言模型 | Ollama + Qwen2.5 |
+| 大语言模型 | Ollama + Qwen2.5:7b（正式默认） |
 | 结构化输出 | JSON Schema + Pydantic v2 |
 | ORM / 数据库 | SQLAlchemy + SQLite |
 | 向量数据库 | ChromaDB |
-| Embedding | 384 维本地 Hash Embedding |
-| RAG | Chunking + Similarity Search + Top-K + Prompt |
+| Embedding | BGE-M3 1024维语义向量；Hash 离线兜底 |
+| RAG | Chunk=1024 + Top-K=5 + 阈值0.30 + Prompt |
 | 导出 | Markdown / JSON / ReportLab PDF |
 | 测试与评估 | pytest + Precision / Recall / F1 + LLM-as-Judge |
 
@@ -82,7 +83,7 @@ meeting-copilot/
 │   ├── meeting_schema.py          # MeetingMinutes Pydantic 模型
 │   ├── meeting_rag.py             # ChromaDB 存储、检索与问答
 │   ├── meeting_insights.py        # 知识图谱与待办看板
-│   ├── embedding_service.py       # 本地 Hash Embedding
+│   ├── embedding_service.py       # BGE-M3 与 Hash 兜底 Embedding
 │   ├── ollama_client.py           # Ollama HTTP 客户端
 │   ├── export_service.py          # Markdown / JSON / PDF 导出
 │   └── evaluation_service.py      # Precision / Recall / F1
@@ -161,14 +162,24 @@ python -m pip install chromadb
 从 [Ollama 官网](https://ollama.com/) 安装 Ollama，然后拉取模型：
 
 ```bash
-ollama pull qwen2.5:1.5b
-```
-
-开发与低配置电脑推荐 `qwen2.5:1.5b`。正式演示、内存充足时可使用：
-
-```bash
 ollama pull qwen2.5:7b
+ollama pull bge-m3
 ```
+
+正式运行默认使用 `qwen2.5:7b` 与 `bge-m3`。低配置电脑可另行拉取 `qwen2.5:1.5b`，并在页面设置中手动切换。
+
+### 5. 正式运行默认配置
+
+| 配置项 | 默认值 |
+|---|---|
+| 生成模型 | `qwen2.5:7b` |
+| Embedding | `bge-m3` |
+| Chunk 大小 | 1024 |
+| Top-K | 5 |
+| 相似度阈值 | 0.30（噪声较多时可在页面调至0.50） |
+| 抽取策略 | 待办使用LLM；决议优先规则；LLM异常时规则兜底 |
+
+从 Hash 或其他分块配置切换到上述配置后，需执行 `python -m scripts.import_dataset --index` 重建向量索引；不同维度的索引不能混用。
 
 确认 Ollama 服务和模型：
 
@@ -289,7 +300,7 @@ http://localhost:11434/api/generate
 ### 找不到 Qwen2.5 模型
 
 ```bash
-ollama pull qwen2.5:1.5b
+ollama pull qwen2.5:7b
 ```
 
 页面设置中的模型名称必须与 `ollama list` 显示的名称一致。
@@ -324,6 +335,34 @@ python -m pip install chromadb
 ## 已知限制与后续方向
 
 - 当前上传的是音频转写后的 TXT / Markdown，尚未内置 ASR 音频识别。
-- 当前 Hash Embedding 无需额外模型，部署简单，但语义效果弱于专业中文 Embedding 模型。
+- BGE-M3 依赖本地 Ollama 服务；服务不可用时可在设置页切换到 Hash 离线兜底，但语义检索效果会下降。
 - 当前账号体系适合本地课程演示；公网部署时应增加 HTTPS、服务端会话、限流、密钥管理和正式数据库。
-- 可进一步接入 Whisper、BGE-M3、PostgreSQL、对象存储和异步任务队列。
+- 可进一步接入 Whisper、PostgreSQL、对象存储和异步任务队列。
+
+## 真实数据导入与正式实验
+
+36 场课程真实会议位于 `data/raw/` 与 `data/processed/`。以下命令可重复执行；相同 `source + external_id` 会更新原记录，不会重复插入：
+
+```powershell
+python -m scripts.import_dataset
+python -m scripts.import_dataset --index
+```
+
+第二条命令需要安装 ChromaDB，并要求 Ollama 已启动且准备好 `bge-m3`。系统默认按 BGE-M3、Chunk=1024 建立独立索引；BGE 请求失败、维度错误或返回全零向量时会明确报错，不会写入无效索引。Hash 仅作为离线兜底，使用独立集合，不与 BGE 索引混用。
+
+正式 RAG 对比实验使用 20 条带人工来源标注的问题和 36 场真实会议：
+
+```powershell
+python -m scripts.run_experiments
+```
+
+默认比较 Hash/BGE-M3、Top-3/5/10 和阈值 0.20/0.30/0.40，输出逐题 CSV、汇总 JSON 与 Markdown 报告到 `data/evaluation/<时间戳>/`。缺少 ChromaDB 时，实验会明确使用内存精确余弦后端；缺少真实 BGE 服务时，该组标记为不可用，不会伪造结果。首轮可复现基线保存在 `data/evaluation/formal_baseline/`。
+
+课程答辩使用的完整实验矩阵会复现《实验对比》中的 Embedding、Top-K、阈值和兜底实验，并增加课程指南要求的 Chunk 大小、无 RAG 对照、20题 LLM-as-Judge、95%置信区间和失败案例：
+
+```powershell
+python -m scripts.run_course_experiments --with-llm
+python -m scripts.run_extraction_experiments
+```
+
+第一条使用 `bge-m3` 与 `nomic-embed-text` 做检索，`qwen2.5:1.5b` 生成回答，`qwen2.5:7b` 作为独立裁判；第二条在10场人工标注会议上比较纯规则、纯LLM和LLM+规则兜底的待办/决议抽取指标。这里保留1.5B生成模型是为了维持已完成实验的可复现性，不代表正式系统默认模型。实验结论已用于正式配置：BGE-M3、Chunk=1024、Top-K=5、阈值0.30和字段级混合抽取。两项实验均支持断点续跑，结果集中保存在 `data/evaluation/course_final/`，并显示在网页“效果评估 → 正式对比实验”。

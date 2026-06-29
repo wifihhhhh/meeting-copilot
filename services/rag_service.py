@@ -16,9 +16,11 @@ class RAGService(MeetingRAG):
         vector_store: Any | None = None,
         client: OllamaClient | None = None,
         chroma_path: str | Path = CHROMA_PATH,
+        **kwargs: Any,
     ) -> None:
         super().__init__(
             chroma_path=chroma_path,
             client=client,
             repository=repository,
+            **kwargs,
         )

@@ -25,6 +25,7 @@ def apply_modern_theme() -> None:
     css = """
         <style>
         :root {
+            color-scheme: dark;
             --bg: #050816;
             --bg-2: #0b1023;
             --glass: rgba(12, 18, 38, 0.44);
@@ -547,6 +548,7 @@ def apply_modern_theme() -> None:
         /* BaseWeb renders select dropdowns in a portal, so the action-board status menu needs stronger glass rules. */
         body div[data-baseweb="popover"],
         body div[data-baseweb="popover"] > div,
+        body div[data-baseweb="popover"] > div > div,
         body div[data-baseweb="select-dropdown"],
         body div[data-baseweb="menu"],
         body div[data-baseweb="menu"] ul,
@@ -556,11 +558,37 @@ def apply_modern_theme() -> None:
             -webkit-text-fill-color: var(--ink) !important;
             border: 0 !important;
             border-radius: var(--radius) !important;
-            background: rgba(255, 255, 255, 0.16) !important;
-            background-color: rgba(255, 255, 255, 0.16) !important;
+            background: rgba(12, 18, 38, 0.86) !important;
+            background-color: rgba(12, 18, 38, 0.86) !important;
             box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24) !important;
             backdrop-filter: blur(20px) saturate(1.18) !important;
             overflow: hidden !important;
+        }
+
+        /* Streamlit 1.5x renders select options in a virtualized portal outside stSelectbox. */
+        body div[data-baseweb="popover"]:has([data-testid="stSelectboxVirtualDropdown"]),
+        body div[data-baseweb="popover"]:has([data-testid="stSelectboxVirtualDropdown"]) > div,
+        body div[data-baseweb="popover"]:has([data-testid="stSelectboxVirtualDropdown"]) > div > div,
+        body [data-testid="stSelectboxVirtualDropdown"],
+        body [data-testid="stSelectboxVirtualDropdownEmpty"] {
+            color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: var(--radius) !important;
+            background: rgba(12, 18, 38, 0.92) !important;
+            background-color: rgba(12, 18, 38, 0.92) !important;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42) !important;
+            backdrop-filter: blur(22px) saturate(1.18) !important;
+            -webkit-backdrop-filter: blur(22px) saturate(1.18) !important;
+            overflow: hidden !important;
+        }
+
+        body [data-testid="stSelectboxVirtualDropdown"] > div,
+        body [data-testid="stSelectboxVirtualDropdown"] > div > div {
+            color: var(--ink) !important;
+            -webkit-text-fill-color: var(--ink) !important;
+            background: transparent !important;
+            background-color: transparent !important;
         }
 
         body div[data-baseweb="popover"] li,
@@ -593,6 +621,91 @@ def apply_modern_theme() -> None:
         body div[data-baseweb="select-dropdown"] li[aria-selected="true"] {
             background: rgba(255, 255, 255, 0.18) !important;
             background-color: rgba(255, 255, 255, 0.18) !important;
+        }
+
+        /* Dark-page data surfaces should feel embedded instead of appearing as white sheets. */
+        div[data-testid="stDataFrame"],
+        div[data-testid="stDataFrame"] > div,
+        div[data-testid="stDataFrameResizable"],
+        div[data-testid="stTable"],
+        div[data-testid="stTable"] table,
+        div[data-testid="stTable"] thead,
+        div[data-testid="stTable"] tbody,
+        div[data-testid="stTable"] tr,
+        div[data-testid="stTable"] th,
+        div[data-testid="stTable"] td,
+        div[data-testid="stJson"],
+        div[data-testid="stJson"] > div,
+        div[data-testid="stJson"] pre,
+        .react-json-view {
+            color: var(--ink) !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            box-shadow: none !important;
+        }
+
+        div[data-testid="stDataFrame"] {
+            padding: 4px;
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.055) !important;
+            backdrop-filter: blur(16px) saturate(1.12);
+        }
+
+        .history-glass-table {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.055);
+            backdrop-filter: blur(16px) saturate(1.12);
+        }
+
+        .history-glass-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: transparent;
+        }
+
+        .history-glass-table th,
+        .history-glass-table td {
+            padding: 12px 14px;
+            color: var(--ink);
+            text-align: left;
+            vertical-align: top;
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        .history-glass-table th {
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+        }
+
+        .history-glass-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        pre.history-json-panel,
+        pre.history-json-panel code {
+            margin: 0;
+            color: #dffcff !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+
+        pre.history-json-panel {
+            max-height: 620px;
+            padding: 16px 18px;
+            overflow: auto;
+            white-space: pre;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: var(--radius) !important;
+            background: rgba(255, 255, 255, 0.045) !important;
+            backdrop-filter: blur(16px) saturate(1.12);
         }
 
         div.stButton > button,

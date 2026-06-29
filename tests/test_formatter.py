@@ -15,4 +15,7 @@ def test_format_minutes_contains_action_items():
         }
     )
     assert "# 会议纪要" in markdown
+    lines = markdown.splitlines()
+    assert lines[2].endswith("  ")
+    assert lines[3].endswith("  ")
     assert "张三 -> 完成测试" in markdown

@@ -28,6 +28,10 @@ exports/json/*
 !exports/pdf/.gitkeep
 !exports/json/.gitkeep
 
+# Reproducible experiment caches (final CSV/JSON/Markdown/PNG remain trackable)
+data/evaluation/course_final/embedding_cache/
+data/evaluation/course_final/*_checkpoint.jsonl
+
 # OS / editor
 .DS_Store
 Thumbs.db
@@ -36,3 +40,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local secrets
+.env

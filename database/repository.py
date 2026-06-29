@@ -33,6 +33,9 @@ class MeetingRepository:
         minutes_json: dict[str, Any],
         minutes_markdown: str,
         user_id: int | None = None,
+        source: str = "user",
+        external_id: str = "",
+        is_shared: bool = False,
     ) -> int:
         with get_session() as session:
             meeting = Meeting(
@@ -42,6 +45,9 @@ class MeetingRepository:
                 raw_text=raw_text,
                 minutes_json=json.dumps(minutes_json, ensure_ascii=False),
                 minutes_markdown=minutes_markdown,
+                source=source,
+                external_id=external_id,
+                is_shared=is_shared,
             )
             session.add(meeting)
             session.flush()
@@ -59,6 +65,8 @@ class MeetingRepository:
             meeting = session.get(Meeting, meeting_id)
             if meeting is None:
                 raise ValueError(f"Meeting not found: {meeting_id}")
+            if meeting.is_shared:
+                raise PermissionError("共享数据集会议为只读，不能在用户工作台中修改。")
             if user_id is not None and meeting.user_id != user_id:
                 raise PermissionError("无权修改其他用户的会议。")
             meeting.title = minutes_json.get("title") or "未命名会议"
@@ -73,7 +81,7 @@ class MeetingRepository:
         with get_session() as session:
             conditions = []
             if user_id is not None:
-                conditions.append(Meeting.user_id == user_id)
+                conditions.append(or_(Meeting.user_id == user_id, Meeting.is_shared.is_(True)))
             if keyword:
                 like = f"%{keyword}%"
                 conditions.append(
@@ -95,7 +103,7 @@ class MeetingRepository:
             meeting = session.get(Meeting, meeting_id)
             if meeting is None:
                 return None
-            if user_id is not None and meeting.user_id != user_id:
+            if user_id is not None and meeting.user_id != user_id and not meeting.is_shared:
                 return None
             return self._to_record(meeting)
 
@@ -104,6 +112,8 @@ class MeetingRepository:
             meeting = session.get(Meeting, meeting_id)
             if meeting is None:
                 return False
+            if meeting.is_shared:
+                raise PermissionError("共享数据集会议为只读，不能删除。")
             if user_id is not None and meeting.user_id != user_id:
                 raise PermissionError("无权删除其他用户的会议。")
 
@@ -117,7 +127,7 @@ class MeetingRepository:
         with get_session() as session:
             stmt = select(ActionItem)
             if user_id is not None:
-                stmt = stmt.join(Meeting).where(Meeting.user_id == user_id)
+                stmt = stmt.join(Meeting).where(or_(Meeting.user_id == user_id, Meeting.is_shared.is_(True)))
             if meeting_id is not None:
                 stmt = stmt.where(ActionItem.meeting_id == meeting_id)
             stmt = stmt.order_by(ActionItem.id)
@@ -141,7 +151,7 @@ class MeetingRepository:
                 raise ValueError(f"Action item not found: {action_item_id}")
             if user_id is not None:
                 meeting = session.get(Meeting, item.meeting_id)
-                if meeting is None or meeting.user_id != user_id:
+                if meeting is None or meeting.is_shared or meeting.user_id != user_id:
                     raise PermissionError("无权修改其他用户的待办事项。")
             item.status = status
 
@@ -149,7 +159,7 @@ class MeetingRepository:
         with get_session() as session:
             stmt = select(Decision)
             if user_id is not None:
-                stmt = stmt.join(Meeting).where(Meeting.user_id == user_id)
+                stmt = stmt.join(Meeting).where(or_(Meeting.user_id == user_id, Meeting.is_shared.is_(True)))
             if meeting_id is not None:
                 stmt = stmt.where(Decision.meeting_id == meeting_id)
             stmt = stmt.order_by(Decision.id)
@@ -193,6 +203,51 @@ class MeetingRepository:
             session.add(result)
             session.flush()
             return int(result.id)
+
+    def upsert_external_meeting(
+        self,
+        *,
+        external_id: str,
+        source: str,
+        raw_text: str,
+        minutes_json: dict[str, Any],
+        minutes_markdown: str,
+        is_shared: bool = True,
+        owner_user_id: int = DEFAULT_USER_ID,
+    ) -> tuple[int, bool]:
+        external_id = external_id.strip()
+        source = source.strip()
+        if not external_id or not source:
+            raise ValueError("source 和 external_id 不能为空。")
+
+        with get_session() as session:
+            stmt = select(Meeting).where(Meeting.source == source, Meeting.external_id == external_id)
+            meeting = session.execute(stmt).scalar_one_or_none()
+            created = meeting is None
+            if meeting is None:
+                meeting = Meeting(
+                    user_id=owner_user_id,
+                    title=minutes_json.get("title") or "未命名会议",
+                    meeting_date=minutes_json.get("date"),
+                    raw_text=raw_text,
+                    minutes_json=json.dumps(minutes_json, ensure_ascii=False),
+                    minutes_markdown=minutes_markdown,
+                    source=source,
+                    external_id=external_id,
+                    is_shared=is_shared,
+                )
+                session.add(meeting)
+                session.flush()
+            else:
+                meeting.title = minutes_json.get("title") or "未命名会议"
+                meeting.meeting_date = minutes_json.get("date")
+                meeting.raw_text = raw_text
+                meeting.minutes_json = json.dumps(minutes_json, ensure_ascii=False)
+                meeting.minutes_markdown = minutes_markdown
+                meeting.is_shared = is_shared
+                meeting.updated_at = utc_now_text()
+            self._replace_children(session, int(meeting.id), minutes_json)
+            return int(meeting.id), created
 
     def list_evaluation_results(
         self,
@@ -296,4 +351,7 @@ class MeetingRepository:
             minutes_markdown=meeting.minutes_markdown,
             created_at=meeting.created_at,
             updated_at=meeting.updated_at,
+            source=meeting.source,
+            external_id=meeting.external_id,
+            is_shared=bool(meeting.is_shared),
         )

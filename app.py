@@ -1,7 +1,12 @@
 import streamlit as st
 
 from auth_ui import current_user_id, render_auth_forms, render_user_box
-from config import APP_NAME, DEFAULT_MODEL
+from config import (
+    APP_NAME,
+    DEFAULT_EMBEDDING_PROVIDER,
+    DEFAULT_MODEL,
+    RAG_SIMILARITY_THRESHOLD,
+)
 from database.repository import MeetingRepository
 from database.sqlite import init_db
 from ui import apply_modern_theme, bento_card, feature_chip, metric_card, platform_hero
@@ -24,6 +29,10 @@ if "model" not in st.session_state:
     st.session_state.model = DEFAULT_MODEL
 if "use_llm" not in st.session_state:
     st.session_state.use_llm = True
+if "embedding_provider" not in st.session_state:
+    st.session_state.embedding_provider = DEFAULT_EMBEDDING_PROVIDER
+if "similarity_threshold" not in st.session_state:
+    st.session_state.similarity_threshold = RAG_SIMILARITY_THRESHOLD
 
 platform_hero(
     "Meeting Copilot",

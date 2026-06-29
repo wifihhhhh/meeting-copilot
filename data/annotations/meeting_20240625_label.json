@@ -1,0 +1,9 @@
+{
+  "title": "设计评审会", "date": "2024-06-25", "time": "15:00-16:00",
+  "participants": ["赵设计", "李经理", "前端小王"], "summary": "评审新版分享页面并确定采用第二版设计稿。", "topics": [],
+  "decisions": [{"owner": "", "content": "采用第二版设计稿，去掉复杂背景动画", "deadline": "", "topic": "分享页面设计"}],
+  "action_items": [
+    {"owner": "赵设计", "task": "交付最终设计稿", "deadline": "6/27", "status": "待办"},
+    {"owner": "前端小王", "task": "完成页面开发排期", "deadline": "6/30", "status": "待办"}
+  ]
+}

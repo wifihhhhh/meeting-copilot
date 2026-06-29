@@ -1,0 +1,9 @@
+{
+  "title": "Q3 中期复盘", "date": "2024-07-25", "time": "16:00-17:30",
+  "participants": ["张总", "李经理", "王工", "数据同学"], "summary": "复盘Q3进度并决定继续邀请奖励、加强风控和留存分析。", "topics": [],
+  "decisions": [{"owner": "", "content": "继续推进邀请奖励，同时加强风控和留存分析", "deadline": "", "topic": "Q3中期复盘"}],
+  "action_items": [
+    {"owner": "数据同学", "task": "输出留存分析", "deadline": "7/30", "status": "待办"},
+    {"owner": "王工", "task": "完成微服务一期总结", "deadline": "7/31", "status": "待办"}
+  ]
+}

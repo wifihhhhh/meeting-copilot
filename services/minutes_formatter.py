@@ -13,8 +13,8 @@ def format_minutes(minutes: dict[str, Any] | Any) -> str:
     lines = [
         "# 会议纪要",
         "",
-        f"**主题：** {title}",
-        f"**时间：** {date} {time}".strip(),
+        f"**主题：** {title}  ",
+        f"**时间：** {date} {time}  ",
         f"**参会人：** {participants}",
         "",
         "## 会议摘要",

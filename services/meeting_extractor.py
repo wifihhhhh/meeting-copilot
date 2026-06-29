@@ -5,7 +5,7 @@ from typing import Any, Callable, TypeVar
 from pydantic import ValidationError
 from requests import RequestException
 
-from config import MIN_RAW_TEXT_LENGTH, PROMPT_DIR
+from config import FIELD_LEVEL_HYBRID_EXTRACTION, MIN_RAW_TEXT_LENGTH, PROMPT_DIR
 from services.meeting_schema import ActionItem, DecisionItem, DiscussionPoint, MeetingMinutes, Topic
 from services.ollama_client import OllamaClient, parse_json_block
 
@@ -33,8 +33,13 @@ class MeetingSchemaValidationError(MeetingExtractionError):
 
 
 class MeetingExtractor:
-    def __init__(self, client: OllamaClient | None = None) -> None:
+    def __init__(
+        self,
+        client: OllamaClient | None = None,
+        field_level_hybrid: bool = FIELD_LEVEL_HYBRID_EXTRACTION,
+    ) -> None:
         self.client = client or OllamaClient()
+        self.field_level_hybrid = field_level_hybrid
 
     def extract(
         self,
@@ -47,11 +52,21 @@ class MeetingExtractor:
             return self._heuristic_extract(raw_text)
 
         try:
-            return self._extract_with_ollama(raw_text)
+            llm_result = self._extract_with_ollama(raw_text)
+            if self.field_level_hybrid:
+                return self._merge_field_level(raw_text, llm_result)
+            return llm_result
         except MeetingExtractionError:
             if fallback_to_heuristic:
                 return self._heuristic_extract(raw_text)
             raise
+
+    def _merge_field_level(self, raw_text: str, llm_result: MeetingMinutes) -> MeetingMinutes:
+        """Keep LLM action items, while preferring high-precision rule decisions."""
+        rule_decisions = self._find_decisions(raw_text)
+        if not rule_decisions:
+            return llm_result
+        return llm_result.model_copy(update={"decisions": rule_decisions})
 
     def _extract_with_ollama(self, raw_text: str) -> MeetingMinutes:
         prompt = self._build_prompt(raw_text)

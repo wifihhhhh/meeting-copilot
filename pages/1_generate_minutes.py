@@ -3,7 +3,12 @@ import json
 import streamlit as st
 
 from auth_ui import render_user_box, require_login
-from config import BASE_DIR
+from config import (
+    BASE_DIR,
+    DEFAULT_EMBEDDING_PROVIDER,
+    DEFAULT_MODEL,
+    RAG_SIMILARITY_THRESHOLD,
+)
 from database.repository import MeetingRepository
 from services.export_service import ExportService
 from services.file_loader import load_text_from_upload
@@ -23,6 +28,10 @@ page_header("生成会议纪要", "输入会议记录，自动抽取议题、发
 
 repo = MeetingRepository()
 exporter = ExportService()
+
+st.session_state.setdefault("model", DEFAULT_MODEL)
+st.session_state.setdefault("embedding_provider", DEFAULT_EMBEDDING_PROVIDER)
+st.session_state.setdefault("similarity_threshold", RAG_SIMILARITY_THRESHOLD)
 
 sample_dir = BASE_DIR / "data" / "samples"
 sample_files = sorted(sample_dir.glob("*.txt")) if sample_dir.exists() else []
@@ -113,7 +122,11 @@ if generate:
                     user_id=user_id,
                 )
                 try:
-                    RAGService(repository=repo).index_meeting(
+                    RAGService(
+                        repository=repo,
+                        embedding_provider=st.session_state.get("embedding_provider", "hash"),
+                        similarity_threshold=st.session_state.get("similarity_threshold"),
+                    ).index_meeting(
                         meeting_id,
                         minutes.get("title") or "未命名会议",
                         minutes.get("date"),
