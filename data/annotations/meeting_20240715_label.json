@@ -1,0 +1,9 @@
+{
+  "title": "灰度上线复盘", "date": "2024-07-15", "time": "18:00-19:00",
+  "participants": ["张总", "李经理", "王工", "刘测试"], "summary": "复盘灰度效果并决定扩大灰度、修复奖励到账延迟。", "topics": [],
+  "decisions": [{"owner": "", "content": "继续扩大灰度到20%，同时修复奖励到账延迟", "deadline": "", "topic": "灰度上线"}],
+  "action_items": [
+    {"owner": "王工", "task": "完成队列消费优化", "deadline": "7/16", "status": "待办"},
+    {"owner": "李经理", "task": "输出灰度数据日报", "deadline": "7/17", "status": "待办"}
+  ]
+}

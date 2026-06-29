@@ -1,0 +1,4 @@
+﻿config,samples,mean_action_precision,mean_action_recall,mean_action_f1,mean_decision_precision,mean_decision_recall,mean_decision_f1,mean_field_completeness,mean_latency_ms
+rules,10,0.648333,0.9,0.73619,0.9,1.0,0.933333,1.0,2.7662
+llm,10,0.85,0.833333,0.84,0.2,0.45,0.261905,1.0,19861.3544
+llm_plus_rules,10,0.766667,0.766667,0.76,0.333333,0.55,0.4,1.0,17054.5435

@@ -1,0 +1,9 @@
+{
+  "title": "研发排期会", "date": "2024-07-05", "time": "11:00-12:00",
+  "participants": ["王工", "前端小王", "后端小刘", "李经理"], "summary": "评估研发工期并确定分享裂变灰度和微服务拆分安排。", "topics": [],
+  "decisions": [{"owner": "", "content": "分享裂变功能7月中旬灰度，微服务拆分按两阶段推进", "deadline": "", "topic": "研发排期"}],
+  "action_items": [
+    {"owner": "后端小刘", "task": "完成奖励接口设计", "deadline": "7/9", "status": "待办"},
+    {"owner": "前端小王", "task": "完成分享页面联调", "deadline": "7/10", "status": "待办"}
+  ]
+}

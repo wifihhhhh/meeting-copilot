@@ -1,0 +1,9 @@
+{
+  "title": "客服反馈分析", "date": "2024-07-20", "time": "10:00-10:45",
+  "participants": ["客服主管", "李经理", "赵设计"], "summary": "分析客服反馈并确定优化规则说明和邀请成功通知。", "topics": [],
+  "decisions": [{"owner": "", "content": "优化规则说明和邀请成功通知", "deadline": "", "topic": "客服反馈"}],
+  "action_items": [
+    {"owner": "赵设计", "task": "给出通知样式", "deadline": "7/22", "status": "待办"},
+    {"owner": "李经理", "task": "修改奖励规则文案", "deadline": "7/23", "status": "待办"}
+  ]
+}

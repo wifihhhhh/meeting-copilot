@@ -1,0 +1,9 @@
+{
+  "title": "增长活动复盘", "date": "2024-06-20", "time": "16:00-17:00",
+  "participants": ["李经理", "张总", "数据同学", "小周"], "summary": "复盘分享活动效果并确定优化落地页和奖励说明。", "topics": [],
+  "decisions": [{"owner": "", "content": "保留邀请奖励，优化落地页和奖励说明", "deadline": "", "topic": "增长活动复盘"}],
+  "action_items": [
+    {"owner": "小周", "task": "完成落地页文案优化", "deadline": "6/25", "status": "待办"},
+    {"owner": "数据同学", "task": "补充分渠道转化分析", "deadline": "6/24", "status": "待办"}
+  ]
+}

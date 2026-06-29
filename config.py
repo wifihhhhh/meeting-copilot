@@ -1,0 +1,30 @@
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parent
+
+APP_NAME = "Meeting Copilot"
+DEFAULT_MODEL = "qwen2.5:7b"
+OLLAMA_URL = "http://localhost:11434/api/generate"
+
+DATABASE_PATH = BASE_DIR / "database" / "meeting_copilot.db"
+CHROMA_PATH = BASE_DIR / "chroma_db"
+EXPORT_DIR = BASE_DIR / "exports"
+PROMPT_DIR = BASE_DIR / "prompts"
+DATA_DIR = BASE_DIR / "data"
+RAW_DATA_DIR = DATA_DIR / "raw"
+PROCESSED_DATA_DIR = DATA_DIR / "processed"
+EVALUATION_DIR = DATA_DIR / "evaluation"
+
+RAG_CHUNK_SIZE = 1024
+RAG_CHUNK_OVERLAP = 120
+RAG_TOP_K = 5
+EMBEDDING_DIM = 384
+DEFAULT_EMBEDDING_PROVIDER = "bge-m3"
+BGE_EMBEDDING_MODEL = "bge-m3"
+BGE_EMBEDDING_DIM = 1024
+RAG_SIMILARITY_THRESHOLD = 0.30
+RAG_FALLBACK_TOP_N = 1
+FIELD_LEVEL_HYBRID_EXTRACTION = True
+
+MIN_RAW_TEXT_LENGTH = 20
